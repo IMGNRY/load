@@ -6,7 +6,7 @@ module.exports = function(Gun, globalOpt) {
     Gun.chain.load = function(cb, opt) {
         opt = Object.assign(globalOpt, opt)
         const gun = this
-        root = gun.back(-1)
+        const root = gun.back(-1)
         return this.val((obj, key) => {
 
             // if null or undefined (but shouldnt be able to be that, right ?).. skip it if opt allows
