@@ -9,7 +9,6 @@
 	}
 
 	module.exports = function(opt) {
-		console.log(opt)
 	    Object.assign(globalOpt, opt)
 	}
 
