@@ -1,24 +1,18 @@
-
-
 (function (env) {
 	var Gun;
 	if(typeof module !== "undefined" && module.exports){ Gun = require('gun/gun') }
 	if(typeof window !== "undefined"){ Gun = window.Gun }
 
     Gun.chain.load = function(cb) {
+        const gun = this, root = gun.back(-1)
+        return this.val((obj, key) => {
 
-        console.log(this);
-        const gun = this
-        return this.val(obj => {
-
-            console.log('hello');
             obj = Gun.obj.copy(obj);
-            const start = Date.now()
+            //const start = Date.now()
             const queue = {}
-            let doc
+            let doc, done
 
             function expand(o) {
-                console.log('expand');
                 if (!doc) {
                     doc = o
                 }
@@ -26,13 +20,7 @@
                     const soul = Gun.val.rel.is(val)
                     if (soul) {
                         queue[soul] = true
-                        console.log('found soul, lets expand', soul);
-                        setTimeout(()=> {
-                            queue[soul] = false
-                            console.log('TIMEOUT');
-                        }, 1000)
-                        gun.get(soul).val(loadedValue => {
-                            console.log('expanded');
+                        root.get(soul).val(loadedValue => {
                             queue[soul] = false
                             loadedValue = Gun.obj.copy(loadedValue)
                             o[prop] = loadedValue
@@ -49,41 +37,15 @@
                         return true
                     }
         		});
-                if (wait) {
-                    console.log('wait');
+                if (done || wait) {
                     // dont send the document back yet, we are still waiting for it load completely
                     return
                 }
-                console.log('done ?');
-                if (done) { return }
                 done = true;
-                cb(doc)
+                cb(doc, key)
             }
 
             expand(obj)
         })
     }
 }());
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//
