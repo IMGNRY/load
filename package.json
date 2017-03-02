@@ -6,8 +6,10 @@
   "repository": "https://github.com/IMGNRY/load.git",
   "author": "Fille Åström <fille@imgnry.com>",
   "license": "MIT",
-  "dependencies": {
-    "fs-extra": "^2.0.0",
+  "peerDependencies": {
     "gun": "^0.6.3"
+  },
+  "devDependencies": {
+    "fs-extra": "^2.0.0"
   }
 }
