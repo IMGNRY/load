@@ -1,60 +1,61 @@
-
 module.exports = function(Gun, globalOpt) {
-	globalOpt = Object.assign({
-		skipnull: true,
-		log: false
-	}, globalOpt)
-   	Gun.chain.load = function(cb, opt) {
-	   opt = Object.assign(globalOpt, opt)
-       const gun = this, root = gun.back(-1)
-       return this.val((obj, key) => {
+    globalOpt = Object.assign({
+        skipnull: true,
+        log: false
+    }, globalOpt)
+    Gun.chain.load = function(cb, opt) {
+        opt = Object.assign(globalOpt, opt)
+        const gun = this
+        root = gun.back(-1)
+        return this.val((obj, key) => {
 
-		   // if null or undefined (but shouldnt be able to be that, right ?).. skip it if opt allows
-		   if (obj == null && opt.skipnull) {
-				if (opt.log) {
-					console.log('skipping null');
-				}
-				return
-		   }
+            // if null or undefined (but shouldnt be able to be that, right ?).. skip it if opt allows
+            if (obj == null && opt.skipnull) {
+                if (opt.log) {
+                    console.log('skipping null');
+                }
+                return
+            }
 
-           obj = Gun.obj.copy(obj);
-           const queue = {}
-           let doc, done
+            obj = Gun.obj.copy(obj);
+            const queue = {}
+            let doc
+            let done
 
-           function expand(o) {
-               if (!doc) {
-                   doc = o
-               }
-               Gun.obj.map(o, (val, prop) => {
-                   const soul = Gun.val.rel.is(val)
-                   if (soul) {
-                       queue[soul] = true
-                       root.get(soul).val(loadedValue => {
-                           queue[soul] = false
-                           loadedValue = Gun.obj.copy(loadedValue)
-                           o[prop] = loadedValue
-                           expand(loadedValue)
-                       })
-                       return
-                   }
+            function expand(o) {
+                if (!doc) {
+                    doc = o
+                }
+                Gun.obj.map(o, (val, prop) => {
+                    const soul = Gun.val.rel.is(val)
+                    if (soul) {
+                        queue[soul] = true
+                        root.get(soul).val(loadedValue => {
+                            queue[soul] = false
+                            loadedValue = Gun.obj.copy(loadedValue)
+                            o[prop] = loadedValue
+                            expand(loadedValue)
+                        })
+                        return
+                    }
 
-                   // if it doesnt have a soul, just attach the value as is
-                   o[prop] = val
-               })
-               const wait = Gun.obj.map(queue, wait => {
-                   if (wait) {
-                       return true
-                   }
-       			});
-               if (done || wait) {
-                   // dont send the document back yet / or again, we are either already done and have sent the doc, or are still waiting for it load completely
-                   return
-               }
-               done = true;
-               cb(doc, key)
-           }
+                    // if it doesnt have a soul, just attach the value as is
+                    o[prop] = val
+                })
+                const wait = Gun.obj.map(queue, wait => {
+                    if (wait) {
+                        return true
+                    }
+                });
+                if (done || wait) {
+                    // dont send the document back yet / or again, we are either already done and have sent the doc, or are still waiting for it load completely
+                    return
+                }
+                done = true;
+                cb(doc, key)
+            }
 
-           expand(obj)
-       })
-   }
+            expand(obj)
+        })
+    }
 }
