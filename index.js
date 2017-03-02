@@ -1,10 +1,20 @@
-module.exports = function(Gun, globalOpt) {
-    globalOpt = Object.assign({
-        skipnull: true,
-        log: false
-    }, globalOpt)
+(function (env) {
+	var Gun;
+	if(typeof module !== "undefined" && module.exports){ Gun = require('gun/gun') }
+	if(typeof window !== "undefined"){ Gun = window.Gun }
+
+	let globalOpt = {
+		skipnull: true,
+		log: false
+	}
+
+	module.exports = function(opt) {
+		console.log(opt)
+	    Object.assign(globalOpt, opt)
+	}
+
     Gun.chain.load = function(cb, opt) {
-        opt = Object.assign(globalOpt, opt)
+        opt = Object.assign({}, globalOpt, opt)
         const gun = this
         const root = gun.back(-1)
         return this.val((obj, key) => {
@@ -58,4 +68,4 @@ module.exports = function(Gun, globalOpt) {
             expand(obj)
         })
     }
-}
+})()
